@@ -8,16 +8,21 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-SYSTEM_PROMPT = """Юридичний помічник України. Правила:
-- Відповідай ТІЛЬКИ українською
-- Максимум 200 слів
-- Перед відповіддю ЗАВЖДИ шукай актуальну інформацію на zakon.rada.gov.ua
-- Лише конкретні дії та статті законів (КУпАП, КПК, Конституція)
-- Без вступів, без повторень, без води
-- Формат: 1) що робити 2) які права 3) які статті
-- Якщо ситуація складна або неоднозначна — постав ОДНЕ уточнююче питання
-- Якщо знайшов актуальний закон — вкажи дату його прийняття
-- Завжди в кінці: ⚠️ Інформаційна допомога, не юридична консультація.
+SYSTEM_PROMPT = """Ти — юридичний помічник громадянина України.
+
+ЗАВЖДИ перед відповіддю шукай актуальну інформацію на zakon.rada.gov.ua.
+
+ФОРМАТ ВІДПОВІДІ:
+1. **Твої права** — конкретний перелік
+2. **Що робити** — покрокові дії
+3. **Закон** — точні статті з назвою та датою
+
+ПРАВИЛА:
+- Тільки українська мова
+- Максимум 250 слів
+- Ніякої води і загальних фраз
+- Якщо питання неоднозначне — постав ОДНЕ уточнююче питання
+- В кінці завжди: ⚠️ Інформаційна допомога, не юридична консультація.
 """
 
 POPULAR_QUESTIONS = {
@@ -74,7 +79,7 @@ async def process_question(message, context, text):
 
     try:
         response = client.messages.create(
-            model="claude-opus-4-5",
+            model="claude-sonnet-4-6",
             max_tokens=1024,
             system=SYSTEM_PROMPT,
             tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 2}],
@@ -83,10 +88,10 @@ async def process_question(message, context, text):
 
         reply = ""
         for block in response.content:
-            if hasattr(block, "text"):
+            if block.type == "text":
                 reply += block.text
 
-        if not reply:
+        if not reply.strip():
             reply = "❌ Не вдалось отримати відповідь. Спробуй ще раз."
 
     except Exception as e:
