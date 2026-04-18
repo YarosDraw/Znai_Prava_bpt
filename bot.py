@@ -91,7 +91,7 @@ async def process_question(message, context, text):
 
     except Exception as e:
         print(f"ПОМИЛКА: {e}")
-reply = f"❌ Помилка: {e}"
+        reply = f"❌ Помилка: {e}"
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("🔙 Головне меню", callback_data="menu")]
