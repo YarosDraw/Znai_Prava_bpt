@@ -90,7 +90,8 @@ async def process_question(message, context, text):
             reply = "❌ Не вдалось отримати відповідь. Спробуй ще раз."
 
     except Exception as e:
-        reply = "❌ Виникла помилка. Спробуй ще раз."
+        print(f"ПОМИЛКА: {e}")
+reply = f"❌ Помилка: {e}"
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("🔙 Головне меню", callback_data="menu")]
